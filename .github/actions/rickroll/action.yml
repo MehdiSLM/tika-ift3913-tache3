@@ -1,0 +1,14 @@
+
+name: "Rickroll"
+description: "Rickroll when a test fails"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Never Gonna Give You Up
+      shell: bash
+      run: |
+        echo "================================="
+        echo "  YOU JUST GOT RICKROLLED!"
+        echo "================================="
+        echo "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
