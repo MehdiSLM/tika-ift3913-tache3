@@ -1,0 +1,12 @@
+rules:
+  - id: java-shell-command-injection
+    languages: [java]
+    severity: ERROR
+    message: "Possible OS Command Injection (CWE-78): shell command constructed dynamically."
+    metadata:
+      cwe: "CWE-78"
+    patterns:
+      - pattern: |
+          String $CMD = $PREFIX + $INPUT;
+          ...
+          new ProcessBuilder("cmd.exe", "/c", $CMD).start();

@@ -1,0 +1,68 @@
+
+name: Semgrep Security Scan
+
+on:
+  push:
+    branches:
+      - main
+      - Thomas
+
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  semgrep:
+    name: Scan Java vulnerabilities
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine baseline
+        id: baseline
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            echo "sha=$BASE_SHA" >> "$GITHUB_OUTPUT"
+          elif [[ "$EVENT_NAME" == "push" ]]; then
+            if [[ "$BEFORE_SHA" =~ ^0+$ ]]; then
+              echo "sha=" >> "$GITHUB_OUTPUT"
+            else
+              echo "sha=$BEFORE_SHA" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "sha=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run Semgrep
+        shell: bash
+        env:
+          BASELINE_SHA: ${{ steps.baseline.outputs.sha }}
+        run: |
+          ARGS=(
+            --config .semgrep/
+            --config p/java
+            --error
+          )
+
+          if [[ -n "$BASELINE_SHA" ]]; then
+            ARGS+=(--baseline-commit "$BASELINE_SHA")
+          fi
+
+          docker run --rm \
+            -v "$PWD:/src" \
+            -w /src \
+            -e BASELINE_SHA \
+            semgrep/semgrep:1.185.0 \
+            semgrep scan "${ARGS[@]}" \
+            tika-core/src/main/java
