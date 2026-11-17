@@ -1,3 +1,56 @@
+# IFT3913 — Tâche 3 : Qualité logicielle
+
+Équipe : Thomas Côté et Mahdi Slimani
+
+1. Vulnérabilités introduites 
+
+1.1 Path traversal
+
+La méthode readFile() construit un chemin à partir d'un nom de fichier fourni en paramètre, sans vérifier qu'il demeure dans le répertoire autorisé. Une entrée contenant ../ pourrait permettre d'accéder à des fichiers hors de ce répertoire.
+
+Détection : règle Semgrep personnalisée java-unsafe-path-read.
+
+
+1.2 OC Command Injection
+
+La méthode executeCommand() concatène directement une entrée utilisateur à une commande exécutée par cmd.exe /c. Des caractères spéciaux pourraient permettre l'exécution de commandes supplémentaires.
+
+Détection : règle Semgrep personnalisée java-shell-command-injection.
+
+
+1.3 SQL Injection 
+
+La méthode findUser() construit une requête SQL par concaténation du nom d'utilisateur, sans utiliser de requête paramétrée. Une entrée malveillante pourrait modifier la requête exécutée.
+
+Détection : règle Semgrep personnalisée java-sql-string-concatenation.
+
+
+1.4 
+
+1.5
+
+1.6
+
+1.7
+
+
+2. Semgrep et Github Actions
+
+Implémentation : 
+Le workflow .github/workflows/semgrep.yml exécute Semgrep avec les règles Java publiques et les règles personnalisées du dossier .semgrep/.
+
+L'option --baseline-commit permet de comparer les résultats à un commit de référence afin d'identifier les nouvelles vulnérabilités. L'option --error provoque l'échec du job lorsqu'une nouvelle détection est trouvée.
+
+Validation : 
+
+Dans le test des vulnérabilités 1.1, 1.2 et 1.3, les 3 nouvelles vulnérabilités sont détectées de façcon appropriée. On a aussi un code de sortie 1 avec une erreur ou lorsque les 3 vulnérabilités sont nouvelles par rapport à origin/main et un code 0 lorsqu'un fichier vulnérable est modifié sans introduire de nouvelle détection.
+
+
+3. Rickroll
+
+Une action a été créée dans .github/actions/rickroll/actions.yml, affichant un message humoristique et un lien vers Never Gonna Give You Up dans les logs. Le workflow main-jdk-build.yml appelle cette action dans les jobs build et e2-tests. L'action est effectuée lorsque l'étape Maven correspondante échoue, qu'il s'agisse d'un échec de test ou d'une autre erreur Maven.
+
+
 Welcome to Apache Tika  <https://tika.apache.org/>
 =================================================
 

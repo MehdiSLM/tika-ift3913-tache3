@@ -1,0 +1,12 @@
+rules:
+  - id: java-unsafe-path-read
+    languages: [java]
+    severity: ERROR
+    message: "Possible Path Traversal (CWE-22): untrusted filename used to read a file."
+    metadata:
+      cwe: "CWE-22"
+    patterns:
+      - pattern: |
+          Path $PATH = Paths.get($BASE, $FILENAME);
+          ...
+          Files.readString($PATH);

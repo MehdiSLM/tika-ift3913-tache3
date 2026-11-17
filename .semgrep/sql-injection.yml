@@ -1,0 +1,12 @@
+rules:
+  - id: java-sql-string-concatenation
+    languages: [java]
+    severity: ERROR
+    message: "Possible SQL Injection (CWE-89): SQL query constructed using string concatenation."
+    metadata:
+      cwe: "CWE-89"
+    patterns:
+      - pattern: |
+          String $QUERY = $PREFIX + $INPUT + $SUFFIX;
+          ...
+          $STMT.executeQuery($QUERY);
