@@ -1,0 +1,14 @@
+rules:
+  - id: java-unsafe-hostname-verifier
+    languages: [java]
+    severity: ERROR
+    message: "CWE-297: HostnameVerifier accepts all hostnames without verification."
+    patterns:
+      - pattern: |
+          public boolean verify(String $HOSTNAME, SSLSession $SESSION) {
+            return true;
+          }
+      - pattern-inside: |
+          class $CLASS implements HostnameVerifier {
+            ...
+          }
