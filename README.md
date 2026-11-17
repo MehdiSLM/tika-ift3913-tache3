@@ -2,27 +2,40 @@
 
 Équipe : Thomas Côté et Mahdi Slimani
 
+
+Note sur l'utilisation de l'IA :
+
+Thomas : ChatGPT a été utilisé pour comprendre la structure des fichiers .yml ainsi que pour régler les problèmes issus des workflows GitHub (par exemple : au niveau du formattage des fichiers, comme un espace vide dans un fichier ou pour les chemins de path trop longs)
+
+
+Note : Le build Linux JDK 17 échoue lors des tests d’intégration S3, car Docker ne parvient pas à télécharger l’image MinIO (401 UNAUTHORIZED), ce qui interrompt l’exécution et entraîne l’omission des vérifications suivantes, sans que celles-ci aient nécessairement échoué (mais cela a confirmé que le rickroll fonctionne bien!).
 1. Vulnérabilités introduites 
 
 1.1 Path traversal
 
-La méthode readFile() construit un chemin à partir d'un nom de fichier fourni en paramètre, sans vérifier qu'il demeure dans le répertoire autorisé. Une entrée contenant ../ pourrait permettre d'accéder à des fichiers hors de ce répertoire.
+Choix du fichier : création d'une classe dédiée dans tika-core/src/main/java/org/apache/tika/tach3securite/, afin d'isoler la vulnérabilité sans affecter le fonctionnement de Tika.
 
-Détection : règle Semgrep personnalisée java-unsafe-path-read.
+Vulnérabilité : le nom de fichier fourni par l'utilisateur est utilisé directement pour construire un chemin, sans validation. Un chemin contenant ../ pourrait permettre d'accéder à des fichiers hors du répertoire prévu.
+
+Résultat Semgrep : 1 détection, règle java-unsafe-path-read, ligne 29.
 
 
-1.2 OC Command Injection
+1.2 OS Command Injection
 
-La méthode executeCommand() concatène directement une entrée utilisateur à une commande exécutée par cmd.exe /c. Des caractères spéciaux pourraient permettre l'exécution de commandes supplémentaires.
+Choix du fichier : création d'une classe dédiée pour illustrer une exécution de commande système non sécurisée.
 
-Détection : règle Semgrep personnalisée java-shell-command-injection.
+Vulnérabilité : l'entrée utilisateur est concaténée à une commande exécutée par cmd.exe /c. Des caractères spéciaux pourraient permettre d'exécuter des commandes supplémentaires.
+
+Résultat Semgrep : 1 détection, règle java-shell-command-injection, ligne 27.
 
 
 1.3 SQL Injection 
 
-La méthode findUser() construit une requête SQL par concaténation du nom d'utilisateur, sans utiliser de requête paramétrée. Une entrée malveillante pourrait modifier la requête exécutée.
+Choix du fichier : création d'une classe dédiée pour illustrer une requête SQL construite à partir d'une entrée utilisateur.
 
-Détection : règle Semgrep personnalisée java-sql-string-concatenation.
+Vulnérabilité : l'entrée utilisateur est concaténée directement à la requête SQL, sans requête préparée ni paramètres. Cela permet potentiellement de modifier la structure de la requête.
+
+Résultat Semgrep : 2 détections, règles java-sql-string-concatenation (ligne 31) et formatted-sql-string (ligne 36).
 
 
 1.4 
@@ -34,19 +47,23 @@ Détection : règle Semgrep personnalisée java-sql-string-concatenation.
 1.7
 
 
-2. Semgrep et Github Actions
+2. Semgrep 
 
-Implémentation : 
-Le workflow .github/workflows/semgrep.yml exécute Semgrep avec les règles Java publiques et les règles personnalisées du dossier .semgrep/.
+2 analyses ont été effectuées avec Semgrep 1.185.0 en utilisant les mêmes 65 règles de sécurité. 
+Avant : 324 fichiers analysés, 3 détections bloquantes
+Après : 331 fichiers analysés, 11 détections bloquantes
 
-L'option --baseline-commit permet de comparer les résultats à un commit de référence afin d'identifier les nouvelles vulnérabilités. L'option --error provoque l'échec du job lorsqu'une nouvelle détection est trouvée.
+Donc, les 3 détections initiales étaient déjà présentes dans Apache Tika et demeurent inchangées. Les 8 nouvelles correspondent  aux 7 types de vulnérabilités introduits : 1 pour chaque et 2 Injections SQL (même vulnérabilité détectée par 2 règles Semgrep différentes : 1 détectant la concaténation d'une entrée d'utilisateur dans une requête SQL et l'autre l'exécution d'uen requête SQL construite de manière non sécurisée).
 
-Validation : 
+3. Conception et validation du workflow
 
-Dans le test des vulnérabilités 1.1, 1.2 et 1.3, les 3 nouvelles vulnérabilités sont détectées de façcon appropriée. On a aussi un code de sortie 1 avec une erreur ou lorsque les 3 vulnérabilités sont nouvelles par rapport à origin/main et un code 0 lorsqu'un fichier vulnérable est modifié sans introduire de nouvelle détection.
+Le workflow .github/workflows/semgrep.yml exécute Semgrep 1.185.0 lors des pushs et des Pull Requests. Il utilise les règles Java officielles (p/java) ainsi que nos règles personnalisées (.semgrep/).
 
+L'option --baseline-commit permet de comparer les modifications à une version de référence afin de détecter uniquement les nouvelles vulnérabilités. L'option --error provoque l'échec du workflow lorsqu'une nouvelle détection est trouvée.
 
-3. Rickroll 
+Validation : la PR #1 a échoué avec 5 détections bloquantes. La PR #2, ne contenant aucune nouvelle vulnérabilité, a réussi. Cela confirme le fonctionnement du mécanisme de détection différentielle.
+
+4. Rickroll 
 
 Une action a été créée dans .github/actions/rickroll/actions.yml, affichant un message humoristique et un lien vers Never Gonna Give You Up dans les logs. Le workflow main-jdk-build.yml appelle cette action dans les jobs build et e2-tests. L'action est effectuée lorsque l'étape Maven correspondante échoue, qu'il s'agisse d'un échec de test ou d'une autre erreur Maven.
 

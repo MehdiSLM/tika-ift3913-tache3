@@ -1,0 +1,10 @@
+rules:
+  - id: java-unsafe-deserialization
+    languages: [java]
+    severity: ERROR
+    message: "CWE-502: Deserialization of untrusted data using ObjectInputStream.readObject()."
+    patterns:
+      - pattern: $STREAM.readObject()
+      - pattern-inside: |
+          ObjectInputStream $STREAM = new ObjectInputStream(...);
+          ...
