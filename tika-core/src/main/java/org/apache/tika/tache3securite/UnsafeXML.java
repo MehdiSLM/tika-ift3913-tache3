@@ -14,13 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tika.tach3securite;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLSession;
+package org.apache.tika.tache3securite;
 
-public class UnsafeTLS implements HostnameVerifier {
-    @Override
-    public boolean verify(String hostname, SSLSession session) {
-        return true;
+import java.io.InputStream;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
+
+public class UnsafeXML {
+
+    public Document readXML(InputStream input) throws Exception {
+        DocumentBuilderFactory factory =
+                DocumentBuilderFactory.newInstance();
+
+        return factory.newDocumentBuilder().parse(input);
     }
 }

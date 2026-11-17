@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tika.tach3securite;
+package org.apache.tika.tache3securite;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
