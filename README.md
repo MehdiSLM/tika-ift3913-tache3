@@ -6,6 +6,7 @@
 Note sur l'utilisation de l'IA :
 
 Thomas : ChatGPT a été utilisé pour comprendre la structure des fichiers .yml ainsi que pour régler les problèmes issus des workflows GitHub (par exemple : au niveau du formattage des fichiers, comme un espace vide dans un fichier ou pour les chemins de path trop longs)
+
 Mahdi : J'ai utiliser gpt pour comprendre pourquoi 2 des classes que j'avais fais au debut n'etait pas detecter et du coup il m'a aussi aider a trouver des idees pour remplacer ces 2 classes. Aussi j'avais eu des avec certains commit sur github comme le format de mes fichier que j'ai du passer en LF par exemple
 au lieu de CRLF et aussi pour j'avais du mal pour prendre le bon lgo de hash pour le 1.7 et dinc m'a aider a prendre sha-1. 
 
