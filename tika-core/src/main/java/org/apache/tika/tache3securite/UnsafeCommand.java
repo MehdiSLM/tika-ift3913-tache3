@@ -14,19 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tika.tach3securite;
+package org.apache.tika.tache3securite;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
+// Une entrée de metacharacters du shell peuvent modifier commande exec
+public class UnsafeCommand {
 
-// Construit un chemin sans vérifier que celui-ci reste dans repo autorisé
-public class PathTraversal {
-// Test de modification sans nouvelle vuln 
-    public String readFile(String filename) throws IOException {
-        Path path = Paths.get("/app/documents", filename); 
-        return Files.readString(path);
+    public Process executeCommand(String userInput)
+            throws IOException {
+
+        String command = "echo " + userInput;
+
+        return new ProcessBuilder(
+                "cmd.exe", "/c", command
+        ).start();
     }
 }
+

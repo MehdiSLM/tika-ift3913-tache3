@@ -14,25 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tika.tach3securite;
+package org.apache.tika.tache3securite;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 
-// Concaténation de username à la requete SQL peut modifier struc requete
-public class UnsafeSQL {
-
-    public ResultSet findUser(Connection connection, String username)
-            throws SQLException {
-
-        String query = "SELECT * FROM users WHERE username = '"
-                + username + "'";
-
-        Statement statement = connection.createStatement();
-
-        return statement.executeQuery(query);
+// Construit un chemin sans vérifier que celui-ci reste dans repo autorisé
+public class PathTraversal {
+// Test de modification sans nouvelle vuln 
+    public String readFile(String filename) throws IOException {
+        Path path = Paths.get("/app/documents", filename); 
+        return Files.readString(path);
     }
 }
+

@@ -14,20 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tika.tach3securite;
+package org.apache.tika.tache3securite;
 
-import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-// Une entrée de metacharacters du shell peuvent modifier commande exec
-public class UnsafeCommand {
 
-    public Process executeCommand(String userInput)
-            throws IOException {
+// Concaténation de username à la requete SQL peut modifier struc requete
+public class UnsafeSQL {
 
-        String command = "echo " + userInput;
+    public ResultSet findUser(Connection connection, String username)
+            throws SQLException {
 
-        return new ProcessBuilder(
-                "cmd.exe", "/c", command
-        ).start();
+        String query = "SELECT * FROM users WHERE username = '"
+                + username + "'";
+
+        Statement statement = connection.createStatement();
+
+        return statement.executeQuery(query);
     }
 }
+
