@@ -18,6 +18,7 @@ package org.apache.tika.tache3securite;
 
 import java.io.InputStream;
 import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.w3c.dom.Document;
 
 public class UnsafeXML {
