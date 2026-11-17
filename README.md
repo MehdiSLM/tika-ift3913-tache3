@@ -46,7 +46,7 @@ Validation :
 Dans le test des vulnérabilités 1.1, 1.2 et 1.3, les 3 nouvelles vulnérabilités sont détectées de façcon appropriée. On a aussi un code de sortie 1 avec une erreur ou lorsque les 3 vulnérabilités sont nouvelles par rapport à origin/main et un code 0 lorsqu'un fichier vulnérable est modifié sans introduire de nouvelle détection.
 
 
-3. Rickroll
+3. Rickroll 
 
 Une action a été créée dans .github/actions/rickroll/actions.yml, affichant un message humoristique et un lien vers Never Gonna Give You Up dans les logs. Le workflow main-jdk-build.yml appelle cette action dans les jobs build et e2-tests. L'action est effectuée lorsque l'étape Maven correspondante échoue, qu'il s'agisse d'un échec de test ou d'une autre erreur Maven.
 
