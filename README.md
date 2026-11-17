@@ -6,7 +6,8 @@
 Note sur l'utilisation de l'IA :
 
 Thomas : ChatGPT a été utilisé pour comprendre la structure des fichiers .yml ainsi que pour régler les problèmes issus des workflows GitHub (par exemple : au niveau du formattage des fichiers, comme un espace vide dans un fichier ou pour les chemins de path trop longs)
-
+Mahdi : J'ai utiliser gpt pour comprendre pourquoi 2 des classes que j'avais fais au debut n'etait pas detecter et du coup il m'a aussi aider a trouver des idees pour remplacer ces 2 classes. Aussi j'avais eu des avec certains commit sur github comme le format de mes fichier que j'ai du passer en LF par exemple
+au lieu de CRLF et aussi pour j'avais du mal pour prendre le bon lgo de hash pour le 1.7 et dinc m'a aider a prendre sha-1. 
 
 Note : Le build Linux JDK 17 échoue lors des tests d’intégration S3, car Docker ne parvient pas à télécharger l’image MinIO (401 UNAUTHORIZED), ce qui interrompt l’exécution et entraîne l’omission des vérifications suivantes, sans que celles-ci aient nécessairement échoué (mais cela a confirmé que le rickroll fonctionne bien!).
 1. Vulnérabilités introduites 
@@ -38,14 +39,30 @@ Vulnérabilité : l'entrée utilisateur est concaténée directement à la requ�
 Résultat Semgrep : 2 détections, règles java-sql-string-concatenation (ligne 31) et formatted-sql-string (ligne 36).
 
 
-1.4 
+1.4 Deserialisation non securisee
 
-1.5
+J'ai creer UnsafeDeseriallization.java pour voir ce que ca fait quand la lecture des donnee n'est pas tres fiables. Le but c'est que la classe utilise ObjectInputStream 
+pour reconstruire des objets sans verifier les autorisations
+Et ca peut etre dangereux si les donnees viennent d'un endroit pas tres secure.
+Resultat Semgrep : 1 detection, regle object-deserialization a ligne 28.
 
-1.6
+1.5 Analyse XML non sécurisée (XXE)
 
-1.7
+Ici je voulais un bug par rapport a quand ca analyse un document XML vue que c'est une fonctionnalite importante de Tika.
+du coup la classe utilise DOcumebntBuilderFactory pour l'analyser sans desactiver les entites extrernes et ca fait que des document dangereux peuvent acceder a certaines resources.
+Resultat Semgrep : 1 detection, regle documentbuilderfactory-disallow-doctype-decl-missing ligne 29
 
+1.6 Verification TLS non securisee
+
+Pour la classe UnsafeTLS je voulais illustrer une mauvaise verification de l'identite d'un sserveur pendant la connection https
+verify() retourne toujours true peu importe le nom du serveur et du coup un serveur dangereux est accepter facilement.
+Resultat Semgrep : 1 detection, regle insecure-hostname-verifier  ligne 21.
+
+1.7 Utilisation d'un algorithme de hachage faible
+
+Et la j'ai fais la classe UnsafeHash.java qui utilise un algorithme cryptographique assez depasse maintenent.
+Il utilise  SHA-1 qui n'est plus considerer suffisant pour certaines securiter comme des signatures numerique par exemple.
+Resultat Semgrep : 1 detection, regle use-of-sha1 ligne 26
 
 2. Semgrep 
 
